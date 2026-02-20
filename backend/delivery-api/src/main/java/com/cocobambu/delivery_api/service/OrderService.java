@@ -1,5 +1,6 @@
 package com.cocobambu.delivery_api.service;
 
+import com.cocobambu.delivery_api.dto.OrderSummaryDTO;
 import com.cocobambu.delivery_api.entity.Order;
 import com.cocobambu.delivery_api.entity.OrderStatus;
 import com.cocobambu.delivery_api.entity.Status;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -16,8 +18,17 @@ public class OrderService {
     @Autowired
     private OrderRepository repository;
 
-    public List<Order> findAll() {
-        return repository.findAll();
+    public List<OrderSummaryDTO> findAll() {
+        List<Order> orders = repository.findAll();
+        
+        return orders.stream().map(order -> {
+            OrderSummaryDTO dto = new OrderSummaryDTO();
+            dto.setId(order.getId());
+            dto.setTotalPrice(order.getTotalPrice());
+            dto.setLastStatusName(order.getLastStatusName());
+            dto.setCreatedAt(order.getCreatedAt());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     public Order findById(String id) {
