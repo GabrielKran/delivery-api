@@ -8,7 +8,7 @@ import com.cocobambu.delivery_api.dto.OrderDetailsDTO;
 import com.cocobambu.delivery_api.dto.PaymentDTO;
 import com.cocobambu.delivery_api.dto.PedidoImportDTO;
 import com.cocobambu.delivery_api.dto.StatusDTO;
-import com.cocobambu.delivery_api.domain.Order;
+import com.cocobambu.delivery_api.entity.Order;
 import com.cocobambu.delivery_api.repository.OrderRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,9 +67,9 @@ public class DataSeeder implements CommandLineRunner {
                         order.setCreatedAt(details.getCreatedAt());
                     
                         if (details.getItems() != null) {
-                            List<com.cocobambu.delivery_api.domain.OrderItem> items = new ArrayList<>();
+                            List<com.cocobambu.delivery_api.entity.OrderItem> items = new ArrayList<>();
                             for (ItemDTO itemDto : details.getItems()) {
-                                com.cocobambu.delivery_api.domain.OrderItem item = new com.cocobambu.delivery_api.domain.OrderItem();
+                                com.cocobambu.delivery_api.entity.OrderItem item = new com.cocobambu.delivery_api.entity.OrderItem();
 
                                 item.setName(itemDto.getName());
                                 if (itemDto.getPrice() != null) {
@@ -88,9 +88,9 @@ public class DataSeeder implements CommandLineRunner {
                         }
                     
                         if (details.getPayments() != null) {
-                            List<com.cocobambu.delivery_api.domain.OrderPayment> payments = new ArrayList<>();
+                            List<com.cocobambu.delivery_api.entity.OrderPayment> payments = new ArrayList<>();
                             for (PaymentDTO payDto : details.getPayments()) {
-                                com.cocobambu.delivery_api.domain.OrderPayment payment = new com.cocobambu.delivery_api.domain.OrderPayment();
+                                com.cocobambu.delivery_api.entity.OrderPayment payment = new com.cocobambu.delivery_api.entity.OrderPayment();
 
                                 if (payDto.getValue() != null) {
                                     payment.setValue(java.math.BigDecimal.valueOf(payDto.getValue()));
@@ -105,13 +105,13 @@ public class DataSeeder implements CommandLineRunner {
                         }
                     
                         if (details.getStatuses() != null) {
-                            List<com.cocobambu.delivery_api.domain.OrderStatus> statuses = new ArrayList<>();
+                            List<com.cocobambu.delivery_api.entity.OrderStatus> statuses = new ArrayList<>();
                             for (StatusDTO statusDto : details.getStatuses()) {
-                                com.cocobambu.delivery_api.domain.OrderStatus status = new com.cocobambu.delivery_api.domain.OrderStatus();
+                                com.cocobambu.delivery_api.entity.OrderStatus status = new com.cocobambu.delivery_api.entity.OrderStatus();
 
                                 // A CORREÇÃO DO ENUM ESTÁ AQUI
                                 if (statusDto.getName() != null) {
-                                    status.setName(com.cocobambu.delivery_api.domain.Status.valueOf(statusDto.getName().toUpperCase()));
+                                    status.setName(com.cocobambu.delivery_api.entity.Status.valueOf(statusDto.getName().toUpperCase()));
 }
                                 status.setCreatedAt(statusDto.getCreatedAt());
 

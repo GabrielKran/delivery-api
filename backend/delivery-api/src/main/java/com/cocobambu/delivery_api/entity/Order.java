@@ -1,4 +1,4 @@
-package com.cocobambu.delivery_api.domain;
+package com.cocobambu.delivery_api.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

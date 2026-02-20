@@ -1,4 +1,4 @@
-package com.cocobambu.delivery_api.domain;
+package com.cocobambu.delivery_api.entity;
 
 public enum Status {
     RECEIVED,
