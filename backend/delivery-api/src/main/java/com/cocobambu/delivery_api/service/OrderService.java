@@ -37,6 +37,23 @@ public class OrderService {
     }
 
     public Order create(Order order) {
+        if (order.getItems() != null && order.getTotalPrice() != null) {
+            double somaCalculada = order.getItems().stream()
+                    .mapToDouble(item -> {
+                        double preco = item.getPrice() != null ? item.getPrice().doubleValue() : 0.0;
+                        int qtd = item.getQuantity() != null ? item.getQuantity() : 1;
+                        return preco * qtd;
+                    })
+                    .sum();
+
+            if (Math.abs(somaCalculada - order.getTotalPrice().doubleValue()) > 0.01) {
+                throw new IllegalArgumentException(
+                        String.format("Tentativa de fraude ou erro de cálculo! O total enviado foi R$ %.2f, mas a soma dos itens é R$ %.2f", 
+                        order.getTotalPrice().doubleValue(), somaCalculada)
+                );
+            }
+        }
+
         order.setId(java.util.UUID.randomUUID().toString());
         order.setCreatedAt(System.currentTimeMillis());
 
