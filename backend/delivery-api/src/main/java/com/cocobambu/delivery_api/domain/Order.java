@@ -3,15 +3,16 @@ package com.cocobambu.delivery_api.domain;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,10 +20,10 @@ public class Order {
 
     @Id
     @Column(name = "order_id", updatable = false, nullable = false)
-    private UUID id;
+    private String id;
 
     @Column(name = "store_id")
-    private UUID storeId;
+    private String storeId;
 
     @Column(name = "store_name")
     private String storeName;
