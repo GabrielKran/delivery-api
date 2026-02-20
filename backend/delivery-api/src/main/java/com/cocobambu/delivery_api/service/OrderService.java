@@ -59,7 +59,6 @@ public class OrderService {
     }
 
     public Order updateOrderStatus(String orderId, String novoStatusStr) {
-        
         Optional<Order> orderOpt = repository.findById(orderId);
         if (orderOpt.isEmpty()) {
             throw new RuntimeException("Pedido não encontrado!");
