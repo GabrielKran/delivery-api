@@ -1,41 +1,77 @@
 // DTO levinho para a Tabela Principal
 export interface OrderSummary {
   id: string;
-  totalPrice: number;
-  lastStatusName: string;
-  createdAt: number;
+  total_price: number;
+  last_status_name: string;
+  created_at: number;
+  customer_name: string;
 }
 
-// Entidade completa para a Aba de Detalhes
-export interface Order {
-  id: string;
-  totalPrice: number;
-  lastStatusName: string;
-  createdAt: number;
+// A resposta completa que vem do findById (O Envelope)
+export interface OrderFullResponse {
+  store_id: string;
+  order_id: string;
+  order: OrderDetails;
+}
+
+// O miolo do pedido com todos os detalhes
+export interface OrderDetails {
+  total_price: number;
+  last_status_name: string;
+  created_at: number;
+  customer: Customer;
+  delivery_address: DeliveryAddress;
+  store: Store;
   items: OrderItem[];
-  payments: OrderPayment[]; // <--- OLHA ELE AQUI!
+  payments: OrderPayment[];
   statuses: OrderStatusHistory[];
 }
 
-// Sub-tipos para o TypeScript te ajudar com o autocompletar:
+export interface Customer {
+  name: string;
+  temporary_phone: string;
+}
+
+export interface DeliveryAddress {
+  reference: string;
+  street_name: string;
+  postal_code: string;
+  country: string;
+  city: string;
+  neighborhood: string;
+  street_number: string;
+  state: string;
+  coordinates: {
+    id: number;
+    longitude: number;
+    latitude: number;
+  };
+}
+
+export interface Store {
+  id: string;
+  name: string;
+}
+
 export interface OrderItem {
-  id: number;
+  code: number;
   name: string;
   price: number;
   quantity: number;
-  totalPrice: number;
+  total_price: number;
   observations: string | null;
+  discount: number;
+  condiments: string[];
 }
 
 export interface OrderPayment {
-  id: number;
   prepaid: boolean;
   value: number;
   origin: string;
 }
 
 export interface OrderStatusHistory {
-  id: number;
   name: string;
-  createdAt: number;
+  created_at: number;
+  origin: string;
 }

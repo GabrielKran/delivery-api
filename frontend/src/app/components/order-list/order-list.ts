@@ -7,7 +7,7 @@ import { OrderDetailsComponent } from '../order-details/order-details';
 @Component({
   selector: 'app-order-list',
   standalone: true,
-  imports: [CommonModule, OrderDetailsComponent], // Injetando o Filho aqui!
+  imports: [CommonModule, OrderDetailsComponent],
   templateUrl: './order-list.html',
   styleUrl: './order-list.css',
 })
@@ -20,7 +20,6 @@ export class OrderListComponent implements OnInit {
   sortColumn: 'date' | 'total' = 'date';
   sortDirection: 'asc' | 'desc' = 'asc';
 
-  // --- VARIÁVEIS DO PAINEL DE DETALHES ---
   selectedOrderId: string | null = null;
   isDetailsOpen: boolean = false;
 
@@ -36,13 +35,13 @@ export class OrderListComponent implements OnInit {
   carregarPedidos(): void {
     this.isLoading = true;
     this.orderService.findAll().subscribe({
-      next: (data) => {
+      next: (data: OrderSummary[]) => {
         this.orders = data || [];
         this.aplicarFiltrosEOrdenacao();
         this.isLoading = false; 
         this.cdr.detectChanges(); 
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erro na API:', err);
         this.isLoading = false; 
         this.cdr.detectChanges(); 
@@ -96,12 +95,12 @@ export class OrderListComponent implements OnInit {
     if (this.activeFilters.length === 0) {
       temp = [...this.orders];
     } else {
-      temp = this.orders.filter((order) => this.activeFilters.includes(order.lastStatusName));
+      temp = this.orders.filter((order) => this.activeFilters.includes(order.last_status_name));
     }
 
     temp.sort((a, b) => {
-      let valA = this.sortColumn === 'date' ? a.createdAt : a.totalPrice;
-      let valB = this.sortColumn === 'date' ? b.createdAt : b.totalPrice;
+      let valA = this.sortColumn === 'date' ? a.created_at : a.total_price;
+      let valB = this.sortColumn === 'date' ? b.created_at : b.total_price;
 
       if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
       if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
@@ -111,25 +110,56 @@ export class OrderListComponent implements OnInit {
     this.filteredOrders = temp;
   }
 
-  // --- AÇÕES DO PAINEL DE DETALHES ---
-  
-  // Abre o painel passando o ID
   abrirDetalhes(order: OrderSummary): void {
     this.selectedOrderId = order.id;
     this.isDetailsOpen = true;
   }
 
-  // Fecha o painel (A função que o Angular estava sentindo falta!)
   fecharDetalhes(): void {
     this.isDetailsOpen = false;
     this.selectedOrderId = null;
   }
 
-  // -----------------------------------
+  // --- MÁQUINA DE ESTADOS (AGORA FUNCIONANDO) ---
+
+  obterProximoStatusParaBackend(statusAtual: string): string | null {
+    const transicoes: any = {
+      'RECEIVED': 'CONFIRMED',
+      'CONFIRMED': 'DISPATCHED',
+      'DISPATCHED': 'DELIVERED'
+    };
+    return transicoes[statusAtual] || null;
+  }
 
   avancarStatus(order: OrderSummary, event: Event): void {
     event.stopPropagation(); 
-    console.log('CHAMAR BACKEND PARA AVANÇAR O STATUS DE:', order.id);
+    
+    const nextStatus = this.obterProximoStatusParaBackend(order.last_status_name);
+    if (!nextStatus) return;
+
+    const btn = event.target as HTMLButtonElement;
+    const textoOriginal = btn.innerText;
+    btn.innerText = 'Processando...';
+    btn.disabled = true;
+
+    this.orderService.updateStatus(order.id, nextStatus).subscribe({
+      next: (updatedOrder) => {
+        // Atualiza o status localmente para refletir na tela imediatamente
+        order.last_status_name = updatedOrder.order.last_status_name;
+
+        btn.innerText = this.getAcaoProximoStatus(order.last_status_name) || 'Finalizado';
+        btn.disabled = false;
+        
+        this.aplicarFiltrosEOrdenacao(); 
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erro ao atualizar status', err);
+        alert('Falha ao avançar o status do pedido.');
+        btn.innerText = textoOriginal;
+        btn.disabled = false;
+      }
+    });
   }
 
   getAcaoProximoStatus(statusAtual: string): string | null {

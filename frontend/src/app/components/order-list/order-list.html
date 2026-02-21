@@ -1,127 +1,137 @@
 <div class="container py-5">
-  
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold mb-0">
-      <span class="text-gold">Coco Bambu</span> | Gestão de Pedidos
-    </h2>
-    
-    <div class="d-flex gap-2 align-items-center">
-      <button class="btn btn-outline-secondary btn-sm filter-btn" (click)="carregarPedidos()" [disabled]="isLoading">
-        {{ isLoading ? 'Atualizando...' : 'Atualizar Dados' }}
-      </button>
-      <button class="btn btn-dark btn-sm shadow-sm filter-btn">
-        + Novo Pedido
-      </button>
-      <span class="badge bg-gold fs-6 shadow-sm ms-2">{{ filteredOrders.length }} Exibidos</span>
-    </div>
-  </div>
 
-  <div class="d-flex gap-2 mb-4">
-    <button class="btn btn-sm rounded-pill px-3 fw-medium filter-btn me-3" 
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">
+            <span class="text-gold">Coco Bambu</span> | Gestão de Pedidos
+        </h2>
+
+        <div class="d-flex gap-2 align-items-center">
+            <button class="btn btn-outline-secondary btn-sm filter-btn" (click)="carregarPedidos()"
+                [disabled]="isLoading">
+                {{ isLoading ? 'Atualizando...' : 'Atualizar Dados' }}
+            </button>
+            <button class="btn btn-dark btn-sm shadow-sm filter-btn">
+                + Novo Pedido
+            </button>
+            <span class="badge bg-gold fs-6 shadow-sm ms-2">{{ filteredOrders.length }} Exibidos</span>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 mb-4">
+        <button class="btn btn-sm rounded-pill px-3 fw-medium filter-btn me-3"
             [ngClass]="isFilterActive('ALL') ? 'btn-dark shadow' : 'btn-outline-dark'" (click)="toggleFilter('ALL')">
-      Todos
-    </button>
-    <button class="btn btn-sm rounded-pill px-3 fw-medium filter-btn"
-            [ngClass]="isFilterActive('RECEIVED') ? 'btn-secondary shadow' : 'btn-outline-secondary'" (click)="toggleFilter('RECEIVED')">
-      Recebidos
-    </button>
-    <button class="btn btn-sm rounded-pill px-3 fw-medium filter-btn"
-            [ngClass]="isFilterActive('CONFIRMED') ? 'btn-info shadow' : 'btn-outline-info'" (click)="toggleFilter('CONFIRMED')">
-      Confirmados
-    </button>
-    <button class="btn btn-sm rounded-pill px-3 fw-medium filter-btn"
-            [ngClass]="isFilterActive('DISPATCHED') ? 'btn-warning shadow' : 'btn-outline-warning'" (click)="toggleFilter('DISPATCHED')">
-      Despachados
-    </button>
-    <button class="btn btn-sm rounded-pill px-3 fw-medium filter-btn"
-            [ngClass]="isFilterActive('DELIVERED') ? 'btn-success shadow' : 'btn-outline-success'" (click)="toggleFilter('DELIVERED')">
-      Entregues
-    </button>
-    <button class="btn btn-sm rounded-pill px-3 fw-medium filter-btn"
-            [ngClass]="isFilterActive('CANCELED') ? 'btn-danger shadow' : 'btn-outline-danger'" (click)="toggleFilter('CANCELED')">
-      Cancelados
-    </button>
-  </div>
-
-  <div class="card border-0 shadow-sm rounded-4" style="border: 1px solid #e9ecef; overflow: visible;">
-    <div class="card-body p-0">
-      <div style="overflow: visible;">
-        
-        <table class="table align-middle mb-0">
-          <thead class="table-light text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;">
-            <tr>
-              <th class="ps-4 py-3" style="width: 15%;">ID do Pedido</th>
-              
-              <th class="py-3 sortable-header" (click)="mudarOrdenacao('date')" title="Clique para ordenar">
-                Data e Hora
-                @if (sortColumn === 'date') {
-                  <span class="ms-1">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                }
-              </th>
-              
-              <th class="py-3 text-center">Status Atual</th>
-              
-              <th class="py-3 sortable-header" (click)="mudarOrdenacao('total')" title="Clique para ordenar">
-                Valor Total
-                @if (sortColumn === 'total') {
-                  <span class="ms-1">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                }
-              </th>
-              
-              <th class="text-end pe-4 py-3">Ações Rápidas</th>
-            </tr>
-          </thead>
-          
-          <tbody>
-            @for (order of filteredOrders; track order.id) {
-              <tr class="fade-in-row clickable-row" (click)="abrirDetalhes(order)">
-                
-                <td class="ps-4 text-muted small id-cell" (click)="copiarId(order.id, $event)">
-                  #{{ order.id.substring(0, 8) }}...
-                  <span class="custom-tooltip">
-                    ID: {{ order.id }}<br>
-                    <small class="text-warning">Clique para copiar</small>
-                  </span>
-                </td>
-                
-                <td class="fw-medium">
-                  {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}
-                </td>
-                
-                <td class="text-center">
-                  <span class="badge rounded-pill {{ getStatusCor(order.lastStatusName) }}" style="font-weight: 500;">
-                    {{ getStatusNome(order.lastStatusName) }}
-                  </span>
-                </td>
-                
-                <td class="fw-bold">
-                  R$ {{ order.totalPrice.toFixed(2) }}
-                </td>
-                
-                <td class="text-end pe-4">
-                  @if (getAcaoProximoStatus(order.lastStatusName)) {
-                    <button class="btn btn-sm btn-gold rounded-3 px-3 shadow-sm filter-btn" 
-                            (click)="avancarStatus(order, $event)">
-                      {{ getAcaoProximoStatus(order.lastStatusName) }}
-                    </button>
-                  } @else {
-                    <span class="text-muted small px-3">Finalizado</span>
-                  }
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="5" class="text-center py-5 text-muted fade-in-row">
-                  Nenhum pedido encontrado para a combinação de filtros.
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-
-      </div>
+            Todos
+        </button>
+        <button class="btn btn-sm rounded-pill px-3 fw-medium filter-btn"
+            [ngClass]="isFilterActive('RECEIVED') ? 'btn-secondary shadow' : 'btn-outline-secondary'"
+            (click)="toggleFilter('RECEIVED')">
+            Recebidos
+        </button>
+        <button class="btn btn-sm rounded-pill px-3 fw-medium filter-btn"
+            [ngClass]="isFilterActive('CONFIRMED') ? 'btn-info shadow' : 'btn-outline-info'"
+            (click)="toggleFilter('CONFIRMED')">
+            Confirmados
+        </button>
+        <button class="btn btn-sm rounded-pill px-3 fw-medium filter-btn"
+            [ngClass]="isFilterActive('DISPATCHED') ? 'btn-warning shadow' : 'btn-outline-warning'"
+            (click)="toggleFilter('DISPATCHED')">
+            Despachados
+        </button>
+        <button class="btn btn-sm rounded-pill px-3 fw-medium filter-btn"
+            [ngClass]="isFilterActive('DELIVERED') ? 'btn-success shadow' : 'btn-outline-success'"
+            (click)="toggleFilter('DELIVERED')">
+            Entregues
+        </button>
+        <button class="btn btn-sm rounded-pill px-3 fw-medium filter-btn"
+            [ngClass]="isFilterActive('CANCELED') ? 'btn-danger shadow' : 'btn-outline-danger'"
+            (click)="toggleFilter('CANCELED')">
+            Cancelados
+        </button>
     </div>
-  </div>
+
+    <div class="card border-0 shadow-sm rounded-4" style="border: 1px solid #e9ecef; overflow: visible;">
+        <div class="card-body p-0">
+            <div style="overflow: visible;">
+
+                <table class="table align-middle mb-0">
+                    <thead class="table-light text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+                        <tr>
+                            <th class="ps-4 py-3" style="width: 15%;">ID do Pedido</th>
+
+                            <th class="py-3 text-center sortable-header" (click)="mudarOrdenacao('date')"
+                                title="Clique para ordenar">
+                                Data e Hora
+                                @if (sortColumn === 'date') {
+                                <span class="ms-1">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                }
+                            </th>
+
+                            <th class="py-3 text-center">Status Atual</th>
+
+                            <th class="py-3 sortable-header" (click)="mudarOrdenacao('total')"
+                                title="Clique para ordenar">
+                                Valor Total
+                                @if (sortColumn === 'total') {
+                                <span class="ms-1">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                }
+                            </th>
+
+                            <th class="text-center pe-4 py-3">Ações Rápidas</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @for (order of filteredOrders; track order.id) {
+                        <tr class="fade-in-row clickable-row" (click)="abrirDetalhes(order)">
+
+                            <td class="ps-4 text-muted small id-cell" (click)="copiarId(order.id, $event)">
+                                <div class="fw-bold text-dark">{{ order.customer_name }}</div> #{{ order.id.substring(0,
+                                8) }}...
+                                <span class="custom-tooltip">
+                                    ID: {{ order.id }}<br>
+                                    <small class="text-warning">Clique para copiar</small>
+                                </span>
+                            </td>
+
+                            <td class="fw-medium text-center">
+                                {{ order.created_at | date:'dd/MM/yyyy HH:mm' }}
+                            </td>
+
+                            <td class="text-center">
+                                <span class="badge rounded-pill {{ getStatusCor(order.last_status_name) }}"
+                                    style="font-weight: 500;">
+                                    {{ getStatusNome(order.last_status_name) }}
+                                </span>
+                            </td>
+
+                            <td class="fw-bold">
+                                R$ {{ order.total_price.toFixed(2) }}
+                            </td>
+
+                            <td class="text-center">
+                                @if (getAcaoProximoStatus(order.last_status_name)) {
+                                <button class="btn btn-sm btn-gold rounded-3 shadow-sm filter-btn mx-auto d-block"
+                                    style="width: 110px;" (click)="avancarStatus(order, $event)">
+                                    {{ getAcaoProximoStatus(order.last_status_name) }}
+                                </button>
+                                } @else {
+                                <span class="text-muted small mx-auto d-block" style="width: 110px;">Finalizado</span>
+                                }
+                            </td>
+                        </tr>
+                        } @empty {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted fade-in-row">
+                                Nenhum pedido encontrado para a combinação de filtros.
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
 </div>
 
 @if (isDetailsOpen) {

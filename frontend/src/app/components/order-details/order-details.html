@@ -6,7 +6,7 @@
     <div>
       <h4 class="mb-1 fw-bold">Detalhes do Pedido</h4>
       @if (orderFull) {
-        <span class="text-muted small">ID: {{ orderFull.id }}</span>
+        <span class="text-muted small">ID: {{ orderFull.order_id }}</span>
       }
     </div>
     <button class="btn-close fs-5" (click)="fechar()"></button>
@@ -25,12 +25,34 @@
         <div class="col-md-8">
           
           <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center mb-3">
+                <h5 class="fw-bold mb-0 me-3">Cliente e Entrega</h5>
+              </div>
+              <div class="row">
+                <div class="col-sm-6">
+                  <p class="mb-1 text-muted small">Cliente</p>
+                  <p class="fw-medium mb-2">{{ orderFull.order.customer.name }}</p>
+                  <p class="mb-1 text-muted small">Telefone</p>
+                  <p class="fw-medium mb-0">{{ orderFull.order.customer.temporary_phone }}</p>
+                </div>
+                <div class="col-sm-6">
+                  <p class="mb-1 text-muted small">Endereço de Entrega</p>
+                  <p class="fw-medium mb-1">{{ orderFull.order.delivery_address.street_name }}, {{ orderFull.order.delivery_address.street_number }}</p>
+                  <p class="text-muted small mb-0">{{ orderFull.order.delivery_address.neighborhood }} - {{ orderFull.order.delivery_address.city }} / {{ orderFull.order.delivery_address.state }}</p>
+                  <p class="text-muted small mt-1">Ref: {{ orderFull.order.delivery_address.reference }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card border-0 shadow-sm rounded-4 mb-4">
             <div class="card-header bg-white border-bottom-0 pt-4 pb-2">
-              <h5 class="fw-bold mb-0">Itens do Pedido ({{ orderFull.items.length }})</h5>
+              <h5 class="fw-bold mb-0">Itens do Pedido ({{ orderFull.order.items.length }})</h5>
             </div>
             <div class="card-body">
               <ul class="list-group list-group-flush">
-                @for (item of orderFull.items; track item.id) {
+                @for (item of orderFull.order.items; track item.code) {
                   <li class="list-group-item px-0 py-3 border-bottom">
                     <div class="d-flex justify-content-between">
                       <div>
@@ -40,7 +62,7 @@
                         }
                       </div>
                       <div class="text-end">
-                        <span class="fw-medium">R$ {{ item.totalPrice.toFixed(2) }}</span>
+                        <span class="fw-medium">R$ {{ item.total_price.toFixed(2) }}</span>
                         <br>
                         <small class="text-muted">R$ {{ item.price.toFixed(2) }} un.</small>
                       </div>
@@ -54,7 +76,7 @@
           <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body">
               <h5 class="fw-bold mb-4">Dados do Pagamento</h5>
-              @for (pay of orderFull.payments; track pay.id) {
+              @for (pay of orderFull.order.payments; track pay.value) {
                 <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3 mb-2">
                   <div class="d-flex align-items-center gap-3">
                     <span class="fs-4">💳</span>
@@ -78,11 +100,11 @@
               <h5 class="fw-bold mb-4">Histórico do Pedido</h5>
               
               <div class="timeline">
-                @for (status of orderFull.statuses; track status.id) {
+                @for (status of orderFull.order.statuses; track status.created_at) {
                   <div class="timeline-item">
                     <div class="timeline-dot"></div>
                     <h6 class="mb-1 fw-bold">{{ getStatusNome(status.name) }}</h6>
-                    <small class="text-muted">{{ status.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</small>
+                    <small class="text-muted">{{ status.created_at | date:'dd/MM/yyyy HH:mm:ss' }}</small>
                   </div>
                 }
               </div>
@@ -92,7 +114,7 @@
           <div class="card border-0 bg-gold text-white rounded-4 shadow-sm">
             <div class="card-body p-4 d-flex justify-content-between align-items-center">
               <h5 class="mb-0 fw-medium">Total Final</h5>
-              <h3 class="mb-0 fw-bold">R$ {{ orderFull.totalPrice.toFixed(2) }}</h3>
+              <h3 class="mb-0 fw-bold">R$ {{ orderFull.order.total_price.toFixed(2) }}</h3>
             </div>
           </div>
 

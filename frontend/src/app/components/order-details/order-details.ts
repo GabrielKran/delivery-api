@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OrderService } from '../../services/order.service';
-import { Order } from '../../models/order';
+import { OrderFullResponse } from '../../models/order';
 
 @Component({
   selector: 'app-order-details',
@@ -14,7 +14,7 @@ export class OrderDetailsComponent implements OnChanges {
   @Input() orderId!: string | null; 
   @Output() closeDetails = new EventEmitter<void>();
 
-  orderFull: Order | null = null;
+  orderFull: OrderFullResponse | null = null;
   isLoading: boolean = false;
   isClosing: boolean = false;
 
@@ -33,12 +33,12 @@ export class OrderDetailsComponent implements OnChanges {
   buscarDetalhes(id: string): void {
     this.isLoading = true;
     this.orderService.findById(id).subscribe({
-      next: (data) => {
+      next: (data: OrderFullResponse) => {
         this.orderFull = data;
         this.isLoading = false;
         this.cdr.detectChanges(); 
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erro ao buscar o pedido completo:', err);
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -68,4 +68,6 @@ export class OrderDetailsComponent implements OnChanges {
     const map: any = { 'CREDIT_CARD': 'Cartão de Crédito', 'DEBIT_CARD': 'Cartão de Débito', 'CASH': 'Dinheiro', 'PIX': 'PIX' };
     return map[origin] || origin;
   }
+
+  
 }
