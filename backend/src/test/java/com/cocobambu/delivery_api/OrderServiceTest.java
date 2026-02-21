@@ -1,5 +1,7 @@
 package com.cocobambu.delivery_api;
 
+// Importamos o DTO que o Service agora devolve
+import com.cocobambu.delivery_api.dto.PedidoImportDTO; 
 import com.cocobambu.delivery_api.entity.Order;
 import com.cocobambu.delivery_api.entity.Status;
 import com.cocobambu.delivery_api.repository.OrderRepository;
@@ -41,15 +43,19 @@ public class OrderServiceTest {
 
     @Test
     void devePermitirTransicaoDeReceivedParaConfirmed() {
-        // Mocka a busca e salvamento no DB. Valida se tem transição para CONFIRMED 
-        // atualiza o status atual e adiciona a mudança ao histórico do pedido.
+        // Mocka a busca do banco
         when(orderRepository.findById("mock-id-123")).thenReturn(Optional.of(pedidoMock));
-        when(orderRepository.save(any(Order.class))).thenReturn(pedidoMock);
+        
+        // MÁGICA AQUI: Diz ao Mockito para retornar o exato objeto que tentamos salvar, 
+        // com todas as modificações (incluindo o status adicionado na lista).
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Order atualizado = orderService.updateOrderStatus("mock-id-123", "CONFIRMED");
+        PedidoImportDTO atualizado = orderService.updateOrderStatus("mock-id-123", "CONFIRMED");
 
-        assertEquals(Status.CONFIRMED.name(), atualizado.getLastStatusName());
-        assertFalse(atualizado.getStatuses().isEmpty());
+        // Validações
+        assertNotNull(atualizado.getOrder(), "O objeto order não deveria ser nulo no DTO");
+        assertEquals(Status.CONFIRMED.name(), atualizado.getOrder().getLastStatusName());
+        assertFalse(atualizado.getOrder().getStatuses().isEmpty(), "O histórico de status não pode estar vazio");
     }
 
     @Test
