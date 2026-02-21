@@ -23,4 +23,9 @@ public class OrderDetailsDTO {
     private List<ItemDTO> items;
     private List<PaymentDTO> payments;
     private List<StatusDTO> statuses;
+    private CustomerDTO customer;
+    private StoreDTO store;
+    
+    @JsonProperty("delivery_address")
+    private DeliveryAddressDTO deliveryAddress;
 }

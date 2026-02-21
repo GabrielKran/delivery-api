@@ -1,6 +1,15 @@
 package com.cocobambu.delivery_api.service;
 
+import com.cocobambu.delivery_api.dto.CoordinatesDTO;
+import com.cocobambu.delivery_api.dto.CustomerDTO;
+import com.cocobambu.delivery_api.dto.DeliveryAddressDTO;
+import com.cocobambu.delivery_api.dto.ItemDTO;
+import com.cocobambu.delivery_api.dto.OrderDetailsDTO;
 import com.cocobambu.delivery_api.dto.OrderSummaryDTO;
+import com.cocobambu.delivery_api.dto.PaymentDTO;
+import com.cocobambu.delivery_api.dto.PedidoImportDTO;
+import com.cocobambu.delivery_api.dto.StatusDTO;
+import com.cocobambu.delivery_api.dto.StoreDTO;
 import com.cocobambu.delivery_api.entity.Order;
 import com.cocobambu.delivery_api.entity.OrderStatus;
 import com.cocobambu.delivery_api.entity.Status;
@@ -24,6 +33,13 @@ public class OrderService {
         return orders.stream().map(order -> {
             OrderSummaryDTO dto = new OrderSummaryDTO();
             dto.setId(order.getId());
+
+            if (order.getCustomer() != null && order.getCustomer().getName() != null) {
+                dto.setCustomerName(order.getCustomer().getName());
+            } else {
+                dto.setCustomerName("Cliente não informado");
+            }
+
             dto.setTotalPrice(order.getTotalPrice());
             dto.setLastStatusName(order.getLastStatusName());
             dto.setCreatedAt(order.getCreatedAt());
@@ -31,9 +47,96 @@ public class OrderService {
         }).collect(Collectors.toList());
     }
 
-    public Order findById(String id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
+    public PedidoImportDTO findById(String id) {
+        Order order = repository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
+
+        // 1. Instancia o envelope principal
+        PedidoImportDTO response = new PedidoImportDTO();
+        response.setOrderId(order.getId());
+        response.setStoreId(order.getStoreId());
+
+        // 2. Instancia o Order (recheio)
+        OrderDetailsDTO details = new OrderDetailsDTO();
+        details.setTotalPrice(order.getTotalPrice() != null ? order.getTotalPrice().doubleValue() : null);
+        details.setLastStatusName(order.getLastStatusName());
+        details.setCreatedAt(order.getCreatedAt());
+
+        // Loja
+        StoreDTO storeDTO = new StoreDTO();
+        storeDTO.setId(order.getStoreId());
+        storeDTO.setName(order.getStoreName());
+        details.setStore(storeDTO);
+
+        // Cliente
+        if (order.getCustomer() != null) {
+            CustomerDTO customerDTO = new CustomerDTO();
+            customerDTO.setName(order.getCustomer().getName());
+            customerDTO.setTemporaryPhone(order.getCustomer().getTemporaryPhone());
+            details.setCustomer(customerDTO);
+        }
+
+        // Endereço
+        if (order.getDeliveryAddress() != null) {
+            DeliveryAddressDTO addressDTO = new DeliveryAddressDTO();
+            addressDTO.setReference(order.getDeliveryAddress().getReference());
+            addressDTO.setStreetName(order.getDeliveryAddress().getStreetName());
+            addressDTO.setPostalCode(order.getDeliveryAddress().getPostalCode());
+            addressDTO.setCountry(order.getDeliveryAddress().getCountry());
+            addressDTO.setCity(order.getDeliveryAddress().getCity());
+            addressDTO.setNeighborhood(order.getDeliveryAddress().getNeighborhood());
+            addressDTO.setStreetNumber(order.getDeliveryAddress().getStreetNumber());
+            addressDTO.setState(order.getDeliveryAddress().getState());
+
+            CoordinatesDTO coords = new CoordinatesDTO();
+            coords.setLongitude(order.getDeliveryAddress().getLongitude());
+            coords.setLatitude(order.getDeliveryAddress().getLatitude());
+            coords.setId(order.getDeliveryAddress().getCoordId());
+
+            addressDTO.setCoordinates(coords);
+            
+            details.setDeliveryAddress(addressDTO);
+        }
+
+        // Itens (escondendo o ID interno do banco)
+        if (order.getItems() != null) {
+            details.setItems(order.getItems().stream().map(item -> {
+                ItemDTO i = new ItemDTO();
+                i.setName(item.getName());
+                i.setQuantity(item.getQuantity());
+                i.setPrice(item.getPrice() != null ? item.getPrice().doubleValue() : null);
+                i.setTotalPrice(item.getTotalPrice() != null ? item.getTotalPrice().doubleValue() : null);
+                i.setObservations(item.getObservations());
+                i.setCode(item.getCode());
+                i.setDiscount(item.getDiscount() != null ? item.getDiscount().doubleValue() : 0.0);
+                return i;
+            }).collect(Collectors.toList()));
+        }
+
+        // Pagamentos
+        if (order.getPayments() != null) {
+            details.setPayments(order.getPayments().stream().map(pay -> {
+                PaymentDTO p = new PaymentDTO();
+                p.setPrepaid(pay.getPrepaid());
+                p.setValue(pay.getValue() != null ? pay.getValue().doubleValue() : null);
+                p.setOrigin(pay.getOrigin());
+                return p;
+            }).collect(Collectors.toList()));
+        }
+
+        // Status
+        if (order.getStatuses() != null) {
+            details.setStatuses(order.getStatuses().stream().map(st -> {
+                StatusDTO s = new StatusDTO();
+                s.setName(st.getName().name());
+                s.setCreatedAt(st.getCreatedAt());
+                s.setOrderId(order.getId());
+                s.setOrigin(st.getOrigin());
+                return s;
+            }).collect(Collectors.toList()));
+        }
+
+        response.setOrder(details);
+        return response;
     }
 
     public Order create(Order order) {

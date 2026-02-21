@@ -1,6 +1,7 @@
 package com.cocobambu.delivery_api.controller;
 
 import com.cocobambu.delivery_api.dto.OrderSummaryDTO;
+import com.cocobambu.delivery_api.dto.PedidoImportDTO; // IMPORTANTE: Adicionamos o import aqui!
 import com.cocobambu.delivery_api.entity.Order;
 import com.cocobambu.delivery_api.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,9 @@ public class OrderController {
         return ResponseEntity.ok(service.findAll());
     }
 
+    // A MUDANÇA ESTÁ AQUI: Trocamos <Order> por <PedidoImportDTO>
     @GetMapping("/{id}")
-    public ResponseEntity<Order> findById(@PathVariable String id) {
+    public ResponseEntity<PedidoImportDTO> findById(@PathVariable String id) {
         return ResponseEntity.ok(service.findById(id));
     }
 

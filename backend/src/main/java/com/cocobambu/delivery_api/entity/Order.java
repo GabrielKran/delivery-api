@@ -45,4 +45,10 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<OrderStatus> statuses;
+
+    @Embedded
+    private CustomerEmbeddable customer;
+
+    @Embedded
+    private AddressEmbeddable deliveryAddress;
 }

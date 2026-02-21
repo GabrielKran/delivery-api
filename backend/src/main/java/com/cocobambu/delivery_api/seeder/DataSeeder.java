@@ -64,13 +64,54 @@ public class DataSeeder implements CommandLineRunner {
                             order.setTotalPrice(java.math.BigDecimal.valueOf(details.getTotalPrice()));
                         }
                         order.setLastStatusName(details.getLastStatusName());
+
+                        if (details.getStore() != null) {
+                            order.setStoreName(details.getStore().getName());
+                        }
+
                         order.setCreatedAt(details.getCreatedAt());
+
+                        // MAPEAMENTO DO CLIENTE
+                        if (details.getCustomer() != null) {
+                            com.cocobambu.delivery_api.entity.CustomerEmbeddable ce = new com.cocobambu.delivery_api.entity.CustomerEmbeddable();
+                            ce.setName(details.getCustomer().getName());
+                            ce.setTemporaryPhone(details.getCustomer().getTemporaryPhone());
+                            order.setCustomer(ce);
+                        }
+
+                        // MAPEAMENTO DO ENDEREÇO
+                        if (details.getDeliveryAddress() != null) {
+                            com.cocobambu.delivery_api.entity.AddressEmbeddable ae = new com.cocobambu.delivery_api.entity.AddressEmbeddable();
+                            ae.setCountry(details.getDeliveryAddress().getCountry());
+                            ae.setReference(details.getDeliveryAddress().getReference());
+                            ae.setStreetName(details.getDeliveryAddress().getStreetName());
+                            ae.setPostalCode(details.getDeliveryAddress().getPostalCode());
+                            ae.setCity(details.getDeliveryAddress().getCity());
+                            ae.setNeighborhood(details.getDeliveryAddress().getNeighborhood());
+                            ae.setStreetNumber(details.getDeliveryAddress().getStreetNumber());
+                            ae.setState(details.getDeliveryAddress().getState());
+
+                            if (details.getDeliveryAddress().getCoordinates() != null) {
+                                ae.setLongitude(details.getDeliveryAddress().getCoordinates().getLongitude());
+                                ae.setLatitude(details.getDeliveryAddress().getCoordinates().getLatitude());
+                                ae.setCoordId(details.getDeliveryAddress().getCoordinates().getId());
+                            }
+                            order.setDeliveryAddress(ae);
+                        }
                     
                         if (details.getItems() != null) {
                             List<com.cocobambu.delivery_api.entity.OrderItem> items = new ArrayList<>();
+
                             for (ItemDTO itemDto : details.getItems()) {
+                                // 1. PRIMEIRO criamos a entidade OrderItem
                                 com.cocobambu.delivery_api.entity.OrderItem item = new com.cocobambu.delivery_api.entity.OrderItem();
 
+                                // 2. DEPOIS passamos os dados do DTO para a Entidade (usando item.set... e não itemDto.set...)
+                                item.setCode(itemDto.getCode());
+                                if (itemDto.getDiscount() != null) {
+                                    item.setDiscount(java.math.BigDecimal.valueOf(itemDto.getDiscount()));
+                                }
+                                
                                 item.setName(itemDto.getName());
                                 if (itemDto.getPrice() != null) {
                                     item.setPrice(java.math.BigDecimal.valueOf(itemDto.getPrice()));
@@ -109,11 +150,11 @@ public class DataSeeder implements CommandLineRunner {
                             for (StatusDTO statusDto : details.getStatuses()) {
                                 com.cocobambu.delivery_api.entity.OrderStatus status = new com.cocobambu.delivery_api.entity.OrderStatus();
 
-                                // A CORREÇÃO DO ENUM ESTÁ AQUI
                                 if (statusDto.getName() != null) {
                                     status.setName(com.cocobambu.delivery_api.entity.Status.valueOf(statusDto.getName().toUpperCase()));
 }
                                 status.setCreatedAt(statusDto.getCreatedAt());
+                                status.setOrigin(statusDto.getOrigin());
 
                                 status.setOrder(order); 
                                 statuses.add(status);

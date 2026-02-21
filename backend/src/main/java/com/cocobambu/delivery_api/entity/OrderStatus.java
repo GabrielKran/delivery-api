@@ -27,4 +27,7 @@ public class OrderStatus {
 
     @Column(name = "created_at")
     private Long createdAt;
+
+    @Column(name = "origin")
+    private String origin;
 }

@@ -6,14 +6,9 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StatusDTO {
-    @JsonProperty("created_at")
-    private Long createdAt;
-    
+public class CustomerDTO {
     private String name;
     
-    @JsonProperty("order_id")
-    private String orderId;
-
-    private String origin;
+    @JsonProperty("temporary_phone")
+    private String temporaryPhone;
 }

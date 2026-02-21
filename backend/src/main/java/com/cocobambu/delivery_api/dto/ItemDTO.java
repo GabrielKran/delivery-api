@@ -16,4 +16,8 @@ public class ItemDTO {
     private Double totalPrice;
     
     private String observations;
+
+    private Integer code;
+    private Double discount;
+    private java.util.List<String> condiments = new java.util.ArrayList<>();
 }
