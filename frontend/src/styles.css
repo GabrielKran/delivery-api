@@ -2,26 +2,28 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
 }
 
-/* Cor primária personalizada (Dourado Coco Bambu) */
 .text-gold {
-  color: #d4af37 !important;
+  color: #b78b2d !important;
 }
 
 .bg-gold {
-  background-color: #d4af37 !important;
-  color: #000 !important;
+  background-color: #b78b2d !important;
+  color: #fff !important;
 }
 
 .btn-gold {
-  background-color: #d4af37;
-  border-color: #d4af37;
-  color: #000;
+  background-color: #b78b2d;
+  border-color: #b78b2d;
+  color: #fff;
   font-weight: 500;
 }
 
 .btn-gold:hover {
-  background-color: #c5a028;
-  border-color: #c5a028;
+  background-color: #9b7625;
+  border-color: #9b7625;
+  color: #fff;
 }

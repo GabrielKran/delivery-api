@@ -1,0 +1,84 @@
+/* Animação para as linhas da tabela surgirem suavemente */
+.fade-in-row {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Efeito nos botões de filtro e ações */
+.filter-btn {
+  transition: all 0.2s ease-in-out;
+}
+.filter-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.filter-btn:active {
+  transform: scale(0.95);
+}
+
+/* Efeito de hover na linha */
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.clickable-row:hover {
+  background-color: #f8f9fa !important;
+}
+
+/* Cabeçalhos clicáveis para ordenação */
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+}
+.sortable-header:hover {
+  color: #b78b2d;
+}
+
+/* Tooltip do ID que aparece para a direita e não é mais cortado */
+.id-cell {
+  position: relative;
+  cursor: copy; /* Mostra ícone de copiar ao passar o mouse */
+}
+
+.custom-tooltip {
+  visibility: hidden;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 100;
+  top: -10px; /* Joga um pouco para cima do alinhamento central */
+  left: 100%; /* Joga totalmente para a direita do texto */
+  margin-left: 10px; /* Dá um espacinho da borda do ID */
+  opacity: 0;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+  pointer-events: none; /* Deixa o clique vazar para a célula */
+}
+
+/* Setinha do balão, agora apontando para a esquerda */
+.custom-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  margin-top: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent #333 transparent transparent;
+}
+
+.id-cell:hover .custom-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+

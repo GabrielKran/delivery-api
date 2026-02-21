@@ -1,0 +1,58 @@
+/* Overlay e Animações Base */
+.overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1040;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.bottom-sheet {
+  position: fixed; bottom: 0; left: 0; width: 100vw; height: 85vh;
+  background-color: #f8f9fa;
+  z-index: 1050;
+  border-top-left-radius: 28px; border-top-right-radius: 28px;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+  display: flex; flex-direction: column;
+  animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* --- AS ANIMAÇÕES DE DESCIDA (QUE FALTAVAM) --- */
+.fade-out {
+  animation: fadeOut 0.3s ease-out;
+}
+
+.slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes slideDown { from { transform: translateY(0); } to { transform: translateY(100%); } }
+
+/* --- DESIGN DA LINHA DO TEMPO (TIMELINE) --- */
+.timeline {
+  border-left: 2px solid #e9ecef;
+  padding-left: 1.5rem;
+  margin-left: 10px;
+  position: relative;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -1.9rem; /* Posiciona a bolinha em cima da linha */
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #b78b2d;
+  border: 2px solid #fff;
+}
