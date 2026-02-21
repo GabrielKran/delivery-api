@@ -97,9 +97,14 @@ public class OrderService {
     }
 
     public void delete(String id) {
-        if (!repository.existsById(id)) {
-            throw new RuntimeException("Pedido não encontrado para exclusão!");
+        Order order = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido não encontrado para exclusão!"));
+
+        // Apenas pedidos cancelados podem ser apagados
+        if (!Status.CANCELED.name().equals(order.getLastStatusName())) {
+            throw new IllegalArgumentException("Regra de Negócio: Apenas pedidos com estado CANCELED podem ser excluídos do sistema.");
         }
+
         repository.deleteById(id);
     }
 

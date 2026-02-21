@@ -20,6 +20,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderServiceTest {
@@ -83,5 +85,42 @@ public class OrderServiceTest {
         });
 
         assertTrue(exception.getMessage().contains("Transição de status inválida"));
+    }
+
+    // --- NOVOS TESTES DE EXCLUSÃO ---
+
+    @Test
+    void naoDevePermitirDeletarPedidoQueNaoEstejaCancelado() {
+        // Array com todos os status em que a exclusão é proibida
+        Status[] statusProibidos = {Status.RECEIVED, Status.CONFIRMED, Status.DISPATCHED, Status.DELIVERED};
+
+        for (Status status : statusProibidos) {
+            // Configura o mock com o status da rodada
+            pedidoMock.setLastStatusName(status.name());
+            when(orderRepository.findById("mock-id-123")).thenReturn(Optional.of(pedidoMock));
+
+            // Tenta deletar e garante que a exceção é lançada
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+                orderService.delete("mock-id-123");
+            });
+
+            // Verifica se a mensagem de erro é a que definimos na regra de negócio
+            assertTrue(exception.getMessage().contains("Apenas pedidos com estado CANCELED podem ser excluídos"));
+        }
+    }
+
+    @Test
+    void devePermitirDeletarPedidoCancelado() {
+        // Prepara o cenário de sucesso (Pedido Cancelado)
+        pedidoMock.setLastStatusName(Status.CANCELED.name());
+        when(orderRepository.findById("mock-id-123")).thenReturn(Optional.of(pedidoMock));
+
+        // Executa a ação e garante que NENHUMA exceção é lançada
+        assertDoesNotThrow(() -> {
+            orderService.delete("mock-id-123");
+        });
+
+        // O Mockito verifica se o método deleteById do repositório foi chamado exatamente 1 vez
+        verify(orderRepository, times(1)).deleteById("mock-id-123");
     }
 }
