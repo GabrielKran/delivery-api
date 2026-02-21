@@ -30,8 +30,8 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<Order> create(@RequestBody Order order) {
-        Order novoPedido = service.create(order);
+    public ResponseEntity<PedidoImportDTO> create(@RequestBody Order order) {
+        PedidoImportDTO novoPedido = service.create(order);
         return ResponseEntity.ok(novoPedido);
     }
 
@@ -43,8 +43,8 @@ public class OrderController {
 
     // Atualizar o Status - A MÁQUINA DE ESTADOS (PATCH /orders/{id}/status?newStatus=CONFIRMED)
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Order> updateStatus(@PathVariable String id, @RequestParam String newStatus) {
-        Order pedidoAtualizado = service.updateOrderStatus(id, newStatus);
+    public ResponseEntity<PedidoImportDTO> updateStatus(@PathVariable String id, @RequestParam String newStatus) {
+        PedidoImportDTO pedidoAtualizado = service.updateOrderStatus(id, newStatus);
         return ResponseEntity.ok(pedidoAtualizado);
     }
 }

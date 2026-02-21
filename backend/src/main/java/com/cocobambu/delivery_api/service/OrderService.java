@@ -49,97 +49,10 @@ public class OrderService {
 
     public PedidoImportDTO findById(String id) {
         Order order = repository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
-
-        // 1. Instancia o envelope principal
-        PedidoImportDTO response = new PedidoImportDTO();
-        response.setOrderId(order.getId());
-        response.setStoreId(order.getStoreId());
-
-        // 2. Instancia o Order (recheio)
-        OrderDetailsDTO details = new OrderDetailsDTO();
-        details.setTotalPrice(order.getTotalPrice() != null ? order.getTotalPrice().doubleValue() : null);
-        details.setLastStatusName(order.getLastStatusName());
-        details.setCreatedAt(order.getCreatedAt());
-
-        // Loja
-        StoreDTO storeDTO = new StoreDTO();
-        storeDTO.setId(order.getStoreId());
-        storeDTO.setName(order.getStoreName());
-        details.setStore(storeDTO);
-
-        // Cliente
-        if (order.getCustomer() != null) {
-            CustomerDTO customerDTO = new CustomerDTO();
-            customerDTO.setName(order.getCustomer().getName());
-            customerDTO.setTemporaryPhone(order.getCustomer().getTemporaryPhone());
-            details.setCustomer(customerDTO);
-        }
-
-        // Endereço
-        if (order.getDeliveryAddress() != null) {
-            DeliveryAddressDTO addressDTO = new DeliveryAddressDTO();
-            addressDTO.setReference(order.getDeliveryAddress().getReference());
-            addressDTO.setStreetName(order.getDeliveryAddress().getStreetName());
-            addressDTO.setPostalCode(order.getDeliveryAddress().getPostalCode());
-            addressDTO.setCountry(order.getDeliveryAddress().getCountry());
-            addressDTO.setCity(order.getDeliveryAddress().getCity());
-            addressDTO.setNeighborhood(order.getDeliveryAddress().getNeighborhood());
-            addressDTO.setStreetNumber(order.getDeliveryAddress().getStreetNumber());
-            addressDTO.setState(order.getDeliveryAddress().getState());
-
-            CoordinatesDTO coords = new CoordinatesDTO();
-            coords.setLongitude(order.getDeliveryAddress().getLongitude());
-            coords.setLatitude(order.getDeliveryAddress().getLatitude());
-            coords.setId(order.getDeliveryAddress().getCoordId());
-
-            addressDTO.setCoordinates(coords);
-            
-            details.setDeliveryAddress(addressDTO);
-        }
-
-        // Itens (escondendo o ID interno do banco)
-        if (order.getItems() != null) {
-            details.setItems(order.getItems().stream().map(item -> {
-                ItemDTO i = new ItemDTO();
-                i.setName(item.getName());
-                i.setQuantity(item.getQuantity());
-                i.setPrice(item.getPrice() != null ? item.getPrice().doubleValue() : null);
-                i.setTotalPrice(item.getTotalPrice() != null ? item.getTotalPrice().doubleValue() : null);
-                i.setObservations(item.getObservations());
-                i.setCode(item.getCode());
-                i.setDiscount(item.getDiscount() != null ? item.getDiscount().doubleValue() : 0.0);
-                return i;
-            }).collect(Collectors.toList()));
-        }
-
-        // Pagamentos
-        if (order.getPayments() != null) {
-            details.setPayments(order.getPayments().stream().map(pay -> {
-                PaymentDTO p = new PaymentDTO();
-                p.setPrepaid(pay.getPrepaid());
-                p.setValue(pay.getValue() != null ? pay.getValue().doubleValue() : null);
-                p.setOrigin(pay.getOrigin());
-                return p;
-            }).collect(Collectors.toList()));
-        }
-
-        // Status
-        if (order.getStatuses() != null) {
-            details.setStatuses(order.getStatuses().stream().map(st -> {
-                StatusDTO s = new StatusDTO();
-                s.setName(st.getName().name());
-                s.setCreatedAt(st.getCreatedAt());
-                s.setOrderId(order.getId());
-                s.setOrigin(st.getOrigin());
-                return s;
-            }).collect(Collectors.toList()));
-        }
-
-        response.setOrder(details);
-        return response;
+        return convertToDto(order);
     }
 
-    public Order create(Order order) {
+    public PedidoImportDTO create(Order order) {
         if (order.getItems() != null && order.getTotalPrice() != null) {
             double somaCalculada = order.getItems().stream()
                     .mapToDouble(item -> {
@@ -179,7 +92,8 @@ public class OrderService {
             order.getPayments().forEach(payment -> payment.setOrder(order));
         }
 
-        return repository.save(order);
+        Order savedOrder = repository.save(order);
+        return convertToDto(savedOrder);
     }
 
     public void delete(String id) {
@@ -189,7 +103,7 @@ public class OrderService {
         repository.deleteById(id);
     }
 
-    public Order updateOrderStatus(String orderId, String novoStatusStr) {
+    public PedidoImportDTO updateOrderStatus(String orderId, String novoStatusStr) {
         Optional<Order> orderOpt = repository.findById(orderId);
         if (orderOpt.isEmpty()) {
             throw new RuntimeException("Pedido não encontrado!");
@@ -201,16 +115,25 @@ public class OrderService {
 
         processChange(statusAtual, novoStatus);
 
+        // Atualiza o status principal
         order.setLastStatusName(novoStatus.name());
 
+        // Prevenção contra NullPointerException (boa prática)
+        if (order.getStatuses() == null) {
+            order.setStatuses(new java.util.ArrayList<>());
+        }
+
+        // Cria o registro no histórico
         OrderStatus statusHistory = new OrderStatus();
         statusHistory.setName(novoStatus);
         statusHistory.setCreatedAt(System.currentTimeMillis());
         statusHistory.setOrder(order);
         
+        // A LINHA CRÍTICA QUE NÃO PODE FALTAR:
         order.getStatuses().add(statusHistory);
 
-        return repository.save(order);
+        Order savedOrder = repository.save(order);
+        return convertToDto(savedOrder);
     }
 
     private void processChange(Status statusAtual, Status novoStatus) {
@@ -232,5 +155,88 @@ public class OrderService {
         if (!isValid) {
             throw new IllegalArgumentException("Transição de status inválida de " + statusAtual + " para " + novoStatus);
         }
+    }
+
+    private PedidoImportDTO convertToDto(Order order) {
+        PedidoImportDTO response = new PedidoImportDTO();
+        response.setOrderId(order.getId());
+        response.setStoreId(order.getStoreId());
+
+        OrderDetailsDTO details = new OrderDetailsDTO();
+        details.setTotalPrice(order.getTotalPrice() != null ? order.getTotalPrice().doubleValue() : null);
+        details.setLastStatusName(order.getLastStatusName());
+        details.setCreatedAt(order.getCreatedAt());
+
+        if (order.getStoreName() != null) {
+            StoreDTO storeDTO = new StoreDTO();
+            storeDTO.setId(order.getStoreId());
+            storeDTO.setName(order.getStoreName());
+            details.setStore(storeDTO);
+        }
+
+        if (order.getCustomer() != null) {
+            CustomerDTO customerDTO = new CustomerDTO();
+            customerDTO.setName(order.getCustomer().getName());
+            customerDTO.setTemporaryPhone(order.getCustomer().getTemporaryPhone());
+            details.setCustomer(customerDTO);
+        }
+
+        if (order.getDeliveryAddress() != null) {
+            DeliveryAddressDTO addressDTO = new DeliveryAddressDTO();
+            addressDTO.setReference(order.getDeliveryAddress().getReference());
+            addressDTO.setStreetName(order.getDeliveryAddress().getStreetName());
+            addressDTO.setPostalCode(order.getDeliveryAddress().getPostalCode());
+            addressDTO.setCountry(order.getDeliveryAddress().getCountry());
+            addressDTO.setCity(order.getDeliveryAddress().getCity());
+            addressDTO.setNeighborhood(order.getDeliveryAddress().getNeighborhood());
+            addressDTO.setStreetNumber(order.getDeliveryAddress().getStreetNumber());
+            addressDTO.setState(order.getDeliveryAddress().getState());
+
+            CoordinatesDTO coords = new CoordinatesDTO();
+            coords.setLongitude(order.getDeliveryAddress().getLongitude());
+            coords.setLatitude(order.getDeliveryAddress().getLatitude());
+            coords.setId(order.getDeliveryAddress().getCoordId());
+            addressDTO.setCoordinates(coords);
+            
+            details.setDeliveryAddress(addressDTO);
+        }
+
+        if (order.getItems() != null) {
+            details.setItems(order.getItems().stream().map(item -> {
+                ItemDTO i = new ItemDTO();
+                i.setName(item.getName());
+                i.setQuantity(item.getQuantity());
+                i.setPrice(item.getPrice() != null ? item.getPrice().doubleValue() : null);
+                i.setTotalPrice(item.getTotalPrice() != null ? item.getTotalPrice().doubleValue() : null);
+                i.setObservations(item.getObservations());
+                i.setCode(item.getCode());
+                i.setDiscount(item.getDiscount() != null ? item.getDiscount().doubleValue() : 0.0);
+                return i;
+            }).collect(java.util.stream.Collectors.toList()));
+        }
+
+        if (order.getPayments() != null) {
+            details.setPayments(order.getPayments().stream().map(pay -> {
+                PaymentDTO p = new PaymentDTO();
+                p.setPrepaid(pay.getPrepaid());
+                p.setValue(pay.getValue() != null ? pay.getValue().doubleValue() : null);
+                p.setOrigin(pay.getOrigin());
+                return p;
+            }).collect(java.util.stream.Collectors.toList()));
+        }
+
+        if (order.getStatuses() != null) {
+            details.setStatuses(order.getStatuses().stream().map(st -> {
+                StatusDTO s = new StatusDTO();
+                s.setName(st.getName().name());
+                s.setCreatedAt(st.getCreatedAt());
+                s.setOrderId(order.getId());
+                s.setOrigin(st.getOrigin());
+                return s;
+            }).collect(java.util.stream.Collectors.toList()));
+        }
+
+        response.setOrder(details);
+        return response;
     }
 }
