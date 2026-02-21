@@ -2,17 +2,31 @@
 
 <div class="bottom-sheet" [ngClass]="{'slide-down': isClosing}">
   
-  <div class="p-4 bg-white border-bottom d-flex justify-content-between align-items-center" style="border-radius: 28px 28px 0 0;">
+  <div class="p-4 bg-white border-bottom d-flex justify-content-between align-items-center header-radius">
     <div>
       <h4 class="mb-1 fw-bold">Detalhes do Pedido</h4>
       @if (orderFull) {
         <span class="text-muted small">ID: {{ orderFull.order_id }}</span>
       }
     </div>
-    <button class="btn-close fs-5" (click)="fechar()"></button>
+    <div class="d-flex gap-2">
+      @if (orderFull && orderFull.order.last_status_name !== 'DELIVERED' && orderFull.order.last_status_name !== 'CANCELED') {
+        <button class="cancel-btn btn btn-outline-danger btn-sm px-3 shadow-sm rounded-pill fw-medium" (click)="showConfirmCancel = true">
+          Cancelar Pedido
+        </button>
+      }
+      
+      @if (orderFull && orderFull.order.last_status_name === 'CANCELED') {
+        <button class="cancel-btn btn btn-danger btn-sm px-3 shadow-sm rounded-pill fw-medium" (click)="showConfirmDelete = true">
+          <i class="bi bi-trash3-fill"></i> Excluir Definitivamente
+        </button>
+      }
+      
+      <button class="btn-close fs-5 ms-3" (click)="fechar()"></button>
+    </div>
   </div>
 
-  <div class="p-4 flex-grow-1 overflow-auto" style="background-color: #f8f9fa;">
+  <div class="p-4 flex-grow-1 overflow-auto bg-light">
     
     @if (isLoading) {
       <div class="d-flex justify-content-center align-items-center h-100">
@@ -20,51 +34,91 @@
       </div>
     } 
     @else if (orderFull) {
-      <div class="row g-4">
-        
-        <div class="col-md-8">
+      <div class="row g-4 pb-5"> <div class="col-lg-8">
           
           <div class="card border-0 shadow-sm rounded-4 mb-4">
             <div class="card-body p-4">
-              <div class="d-flex align-items-center mb-3">
-                <h5 class="fw-bold mb-0 me-3">Cliente e Entrega</h5>
-              </div>
+              <h5 class="fw-bold mb-3 border-bottom pb-2">Informações Gerais</h5>
               <div class="row">
-                <div class="col-sm-6">
-                  <p class="mb-1 text-muted small">Cliente</p>
-                  <p class="fw-medium mb-2">{{ orderFull.order.customer.name }}</p>
-                  <p class="mb-1 text-muted small">Telefone</p>
-                  <p class="fw-medium mb-0">{{ orderFull.order.customer.temporary_phone }}</p>
+                <div class="col-md-6 mb-3">
+                  <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem;">Cliente</small>
+                  <p class="fw-bold mb-1 fs-5">{{ orderFull.order.customer.name }}</p>
+                  <p class="text-muted mb-0"><i class="bi bi-telephone-fill me-1"></i> {{ orderFull.order.customer.temporary_phone }}</p>
                 </div>
-                <div class="col-sm-6">
-                  <p class="mb-1 text-muted small">Endereço de Entrega</p>
-                  <p class="fw-medium mb-1">{{ orderFull.order.delivery_address.street_name }}, {{ orderFull.order.delivery_address.street_number }}</p>
-                  <p class="text-muted small mb-0">{{ orderFull.order.delivery_address.neighborhood }} - {{ orderFull.order.delivery_address.city }} / {{ orderFull.order.delivery_address.state }}</p>
-                  <p class="text-muted small mt-1">Ref: {{ orderFull.order.delivery_address.reference }}</p>
+                <div class="col-md-6">
+                  <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem;">Loja (Origem)</small>
+                  <p class="fw-bold mb-1">{{ orderFull.order.store.name || 'Loja Padrão' }}</p>
+                  <p class="text-muted mb-0 small text-truncate" title="{{ orderFull.order.store.id }}">ID: {{ orderFull.order.store.id }}</p>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-header bg-white border-bottom-0 pt-4 pb-2">
-              <h5 class="fw-bold mb-0">Itens do Pedido ({{ orderFull.order.items.length }})</h5>
+            <div class="card-body p-4">
+               <h5 class="fw-bold mb-3 border-bottom pb-2">Endereço de Entrega</h5>
+               <div class="row">
+                 <div class="col-sm-8 mb-3">
+                   <p class="fw-medium fs-5 mb-1">{{ orderFull.order.delivery_address.street_name }}, Nº {{ orderFull.order.delivery_address.street_number }}</p>
+                   <p class="text-muted mb-1">{{ orderFull.order.delivery_address.neighborhood }} - {{ orderFull.order.delivery_address.city }} / {{ orderFull.order.delivery_address.state }}</p>
+                   <p class="text-muted mb-1 small">CEP: {{ orderFull.order.delivery_address.postal_code }} | País: {{ orderFull.order.delivery_address.country }}</p>
+                   @if (orderFull.order.delivery_address.reference) {
+                      <p class="mt-2 mb-0"><span class="badge bg-light text-dark border">Ref: {{ orderFull.order.delivery_address.reference }}</span></p>
+                   }
+                 </div>
+                 <div class="col-sm-4 bg-light rounded-3 p-3 text-center align-self-center">
+                    <small class="text-muted d-block mb-1">Coordenadas de GPS</small>
+                    <div class="fw-medium small">Lat: {{ orderFull.order.delivery_address.coordinates.latitude }}</div>
+                    <div class="fw-medium small">Lng: {{ orderFull.order.delivery_address.coordinates.longitude }}</div>
+                    <a [href]="'https://www.google.com/maps/search/?api=1&query=' + orderFull.order.delivery_address.coordinates.latitude + ',' + orderFull.order.delivery_address.coordinates.longitude" 
+                       target="_blank" 
+                       class="btn btn-sm btn-outline-secondary mt-2 px-3 rounded-pill" style="font-size: 0.75rem;">
+                       Abrir no Maps
+                    </a>
+                 </div>
+               </div>
             </div>
-            <div class="card-body">
-              <ul class="list-group list-group-flush">
+          </div>
+
+          <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-2 d-flex justify-content-between">
+              <h5 class="fw-bold mb-0">Itens do Pedido</h5>
+              <span class="badge bg-dark rounded-pill">{{ orderFull.order.items.length }}</span>
+            </div>
+            <div class="card-body p-0">
+              <ul class="list-group list-group-flush rounded-bottom-4">
                 @for (item of orderFull.order.items; track item.code) {
-                  <li class="list-group-item px-0 py-3 border-bottom">
-                    <div class="d-flex justify-content-between">
-                      <div>
-                        <h6 class="mb-1 fw-bold">{{ item.quantity }}x {{ item.name }}</h6>
+                  <li class="list-group-item p-4 border-bottom">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div class="me-3">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                          <span class="badge bg-gold px-2 py-1">{{ item.quantity }}x</span>
+                          <h6 class="mb-0 fw-bold fs-5">{{ item.name }}</h6>
+                        </div>
+                        <small class="text-muted d-block mb-2">Código: {{ item.code || 'N/A' }}</small>
+                        
                         @if (item.observations) {
-                          <small class="text-danger">Obs: {{ item.observations }}</small>
+                          <div class="alert alert-warning py-1 px-2 mb-2 d-inline-block small" role="alert">
+                            <strong>Obs:</strong> {{ item.observations }}
+                          </div>
+                        }
+
+                        @if (item.condiments && item.condiments.length > 0) {
+                          <div class="mt-1">
+                            <small class="text-muted me-1">Condimentos:</small>
+                            @for (cond of item.condiments; track cond) {
+                              <span class="badge bg-light text-secondary border me-1">{{ cond }}</span>
+                            }
+                          </div>
                         }
                       </div>
-                      <div class="text-end">
-                        <span class="fw-medium">R$ {{ item.total_price.toFixed(2) }}</span>
-                        <br>
+                      
+                      <div class="text-end min-w-100">
+                        <span class="fw-bold fs-5 d-block">R$ {{ item.total_price.toFixed(2) }}</span>
                         <small class="text-muted">R$ {{ item.price.toFixed(2) }} un.</small>
+                        @if (item.discount && item.discount > 0) {
+                          <br><small class="text-success fw-medium">Desc: -R$ {{ item.discount.toFixed(2) }}</small>
+                        }
                       </div>
                     </div>
                   </li>
@@ -73,54 +127,87 @@
             </div>
           </div>
 
-          <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body">
-              <h5 class="fw-bold mb-4">Dados do Pagamento</h5>
+        </div>
+
+        <div class="col-lg-4">
+          
+          <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+              <h5 class="fw-bold mb-3 border-bottom pb-2">Pagamento</h5>
+              
               @for (pay of orderFull.order.payments; track pay.value) {
-                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3 mb-2">
+                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-3 mb-3 border">
                   <div class="d-flex align-items-center gap-3">
-                    <span class="fs-4">💳</span>
+                    <div class="bg-white p-2 rounded shadow-sm">
+                       <span class="fs-5">{{ getIconePagamento(pay.origin) }}</span>
+                    </div>
                     <div>
-                      <h6 class="mb-0 fw-medium">{{ getOrigemPagamento(pay.origin) }}</h6>
-                      <small class="text-muted">{{ pay.prepaid ? 'Pago pelo Aplicativo' : 'Pagar na Entrega' }}</small>
+                      <h6 class="mb-0 fw-bold">{{ getOrigemPagamento(pay.origin) }}</h6>
+                      <small class="text-muted">{{ pay.prepaid ? 'Pré-pago (App)' : 'Pagar na Entrega' }}</small>
                     </div>
                   </div>
                   <h5 class="mb-0 fw-bold">R$ {{ pay.value.toFixed(2) }}</h5>
                 </div>
               }
+
+              <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                <span class="fw-medium text-muted">Total do Pedido</span>
+                <h3 class="mb-0 fw-bold text-gold">R$ {{ orderFull.order.total_price.toFixed(2) }}</h3>
+              </div>
             </div>
           </div>
 
-        </div>
-
-        <div class="col-md-4">
-          
           <div class="card border-0 shadow-sm rounded-4 mb-4">
             <div class="card-body p-4">
-              <h5 class="fw-bold mb-4">Histórico do Pedido</h5>
+              <h5 class="fw-bold mb-4 border-bottom pb-2">Histórico de Status</h5>
               
-              <div class="timeline">
+              <div class="timeline mt-3">
                 @for (status of orderFull.order.statuses; track status.created_at) {
                   <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <h6 class="mb-1 fw-bold">{{ getStatusNome(status.name) }}</h6>
-                    <small class="text-muted">{{ status.created_at | date:'dd/MM/yyyy HH:mm:ss' }}</small>
+                    <div class="timeline-dot" [ngClass]="{'bg-gold': $last, 'bg-secondary': !$last}"></div>
+                    <div class="d-flex justify-content-between w-100">
+                      <div>
+                        <h6 class="mb-0 fw-bold" [ngClass]="{'text-gold': $last}">{{ getStatusNome(status.name) }}</h6>
+                        <small class="text-muted d-block">{{ status.created_at | date:'dd/MM/yyyy HH:mm:ss' }}</small>
+                        <small class="text-muted" style="font-size: 0.7rem;">Origem: {{ status.origin || 'SISTEMA' }}</small>
+                      </div>
+                    </div>
                   </div>
                 }
               </div>
             </div>
           </div>
 
-          <div class="card border-0 bg-gold text-white rounded-4 shadow-sm">
-            <div class="card-body p-4 d-flex justify-content-between align-items-center">
-              <h5 class="mb-0 fw-medium">Total Final</h5>
-              <h3 class="mb-0 fw-bold">R$ {{ orderFull.order.total_price.toFixed(2) }}</h3>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
+        </div> </div>
     }
   </div>
+  @if (showConfirmCancel) {
+    <div class="custom-modal-overlay">
+      <div class="custom-modal-card p-4 rounded-4 text-center shadow-lg bg-white">
+        <h5 class="fw-bold mb-3">Atenção!</h5>
+        <p class="text-muted mb-4">Tem certeza que deseja cancelar o pedido <strong>{{ orderFull?.order_id?.substring(0,8) }}</strong>? Esta ação não pode ser desfeita.</p>
+        <div class="d-flex justify-content-center gap-3">
+          <button class="btn btn-light rounded-pill px-4" (click)="showConfirmCancel = false" [disabled]="isProcessing">Voltar</button>
+          <button class="btn btn-danger rounded-pill px-4" (click)="confirmarCancelamento()" [disabled]="isProcessing">
+            {{ isProcessing ? 'Processando...' : 'Sim, Cancelar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showConfirmDelete) {
+    <div class="custom-modal-overlay">
+      <div class="custom-modal-card p-4 rounded-4 text-center shadow-lg bg-white">
+        <h5 class="fw-bold mb-3 text-danger">Excluir Pedido</h5>
+        <p class="text-muted mb-4">Este pedido será excluído <strong>permanentemente</strong> do banco de dados.</p>
+        <div class="d-flex justify-content-center gap-3">
+          <button class="btn btn-light rounded-pill px-4" (click)="showConfirmDelete = false" [disabled]="isProcessing">Manter Pedido</button>
+          <button class="btn btn-danger rounded-pill px-4" (click)="confirmarExclusao()" [disabled]="isProcessing">
+            {{ isProcessing ? 'Excluindo...' : 'Excluir' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

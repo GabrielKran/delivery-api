@@ -7,7 +7,7 @@
 }
 
 .bottom-sheet {
-  position: fixed; bottom: 0; left: 0; width: 100vw; height: 85vh;
+  position: fixed; bottom: 0; left: 0; width: 100vw; height: 90vh; /* Aumentei um pouco a altura */
   background-color: #f8f9fa;
   z-index: 1050;
   border-top-left-radius: 28px; border-top-right-radius: 28px;
@@ -16,21 +16,25 @@
   animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* --- AS ANIMAÇÕES DE DESCIDA (QUE FALTAVAM) --- */
-.fade-out {
-  animation: fadeOut 0.3s ease-out;
+.header-radius {
+  border-radius: 28px 28px 0 0;
 }
 
-.slide-down {
-  animation: slideDown 0.3s ease-out;
-}
+/* Animações de saída */
+.fade-out { animation: fadeOut 0.3s ease-out forwards; }
+.slide-down { animation: slideDown 0.3s ease-out forwards; }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 @keyframes slideDown { from { transform: translateY(0); } to { transform: translateY(100%); } }
 
-/* --- DESIGN DA LINHA DO TEMPO (TIMELINE) --- */
+/* Estilos auxiliares */
+.min-w-100 { min-width: 100px; }
+.text-gold { color: #b78b2d !important; }
+.bg-gold { background-color: #b78b2d !important; }
+
+/* Timeline refinada */
 .timeline {
   border-left: 2px solid #e9ecef;
   padding-left: 1.5rem;
@@ -40,7 +44,7 @@
 
 .timeline-item {
   position: relative;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem; /* Mais respiro entre os itens */
 }
 
 .timeline-item:last-child {
@@ -49,10 +53,36 @@
 
 .timeline-dot {
   position: absolute;
-  left: -1.9rem; /* Posiciona a bolinha em cima da linha */
-  width: 14px;
-  height: 14px;
+  left: -1.9rem;
+  top: 0.2rem;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background-color: #b78b2d;
-  border: 2px solid #fff;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px #dee2e6;
+}
+
+/* Modais Customizados (Substitutos do Alert/Confirm) */
+.custom-modal-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(255, 255, 255, 0.85); /* Fundo semi-transparente claro */
+  z-index: 1060;
+  display: flex; justify-content: center; align-items: center;
+  border-top-left-radius: 28px; border-top-right-radius: 28px;
+  animation: fadeIn 0.2s ease-out;
+}
+.custom-modal-card {
+  max-width: 400px;
+  border: 1px solid #e9ecef;
+}
+
+.cancel-btn {
+  transition: all 0.2s ease-in-out;
+}
+.cancel-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.cancel-btn:active {
+  transform: scale(0.95);
 }

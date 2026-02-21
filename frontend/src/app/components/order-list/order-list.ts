@@ -149,7 +149,7 @@ export class OrderListComponent implements OnInit {
 
         btn.innerText = this.getAcaoProximoStatus(order.last_status_name) || 'Finalizado';
         btn.disabled = false;
-        
+
         this.aplicarFiltrosEOrdenacao(); 
         this.cdr.detectChanges();
       },
@@ -191,5 +191,20 @@ export class OrderListComponent implements OnInit {
       CANCELED: 'bg-danger',
     };
     return colorMap[status] || 'bg-light text-dark';
+  }
+
+  // Chamado quando o modal de detalhes cancela um pedido
+  atualizarStatusNaLista(novoStatus: string): void {
+    const pedido = this.orders.find(o => o.id === this.selectedOrderId);
+    if (pedido) {
+      pedido.last_status_name = novoStatus;
+      this.aplicarFiltrosEOrdenacao(); // Reorganiza a tabela na hora!
+    }
+  }
+
+  // Chamado quando o modal de detalhes exclui um pedido
+  removerPedidoDaLista(idParaRemover: string): void {
+    this.orders = this.orders.filter(o => o.id !== idParaRemover);
+    this.aplicarFiltrosEOrdenacao(); // Some da tabela na hora!
   }
 }

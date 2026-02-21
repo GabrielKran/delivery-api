@@ -135,6 +135,10 @@
 </div>
 
 @if (isDetailsOpen) {
-    <app-order-details [orderId]="selectedOrderId" (closeDetails)="fecharDetalhes()">
+    <app-order-details 
+        [orderId]="selectedOrderId" 
+        (closeDetails)="fecharDetalhes()"
+        (statusChanged)="atualizarStatusNaLista($event)"
+        (orderDeleted)="removerPedidoDaLista($event)">
     </app-order-details>
 }
