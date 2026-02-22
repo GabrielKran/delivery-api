@@ -14,7 +14,6 @@ export class OrderDetailsComponent implements OnChanges {
   @Input() orderId!: string | null; 
   @Output() closeDetails = new EventEmitter<void>();
   
-  // NOVOS EVENTOS PARA AVISAR A LISTA:
   @Output() statusChanged = new EventEmitter<string>();
   @Output() orderDeleted = new EventEmitter<string>();
 
@@ -22,7 +21,6 @@ export class OrderDetailsComponent implements OnChanges {
   isLoading: boolean = false;
   isClosing: boolean = false;
 
-  // CONTROLES DOS NOSSOS MODAIS CUSTOMIZADOS
   showConfirmCancel: boolean = false;
   showConfirmDelete: boolean = false;
   isProcessing: boolean = false;
@@ -61,7 +59,6 @@ export class OrderDetailsComponent implements OnChanges {
     }, 300); 
   }
 
-  // --- NOVA LÓGICA DE CANCELAMENTO ---
   confirmarCancelamento(): void {
     if (!this.orderId || !this.orderFull) return;
     
@@ -69,20 +66,19 @@ export class OrderDetailsComponent implements OnChanges {
     this.orderService.updateStatus(this.orderId, 'CANCELED').subscribe({
       next: (updated) => {
         this.orderFull = updated;
-        this.showConfirmCancel = false; // Fecha o modalzinho
+        this.showConfirmCancel = false;
         this.isProcessing = false;
-        this.statusChanged.emit('CANCELED'); // Avisa a tabela no fundo para atualizar!
+        this.statusChanged.emit('CANCELED');
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error(err);
         this.isProcessing = false;
-        alert('Erro ao tentar cancelar o pedido.'); // Mantemos alert só para erros críticos de rede
+        alert('Erro ao tentar cancelar o pedido.');
       }
     });
   }
 
-  // --- NOVA LÓGICA DE EXCLUSÃO ---
   confirmarExclusao(): void {
     if (!this.orderId) return;
 
@@ -90,8 +86,8 @@ export class OrderDetailsComponent implements OnChanges {
     this.orderService.delete(this.orderId).subscribe({
       next: () => {
         this.isProcessing = false;
-        this.orderDeleted.emit(this.orderId!); // Avisa a lista para remover a linha
-        this.fechar(); // Fecha os detalhes
+        this.orderDeleted.emit(this.orderId!);
+        this.fechar();
       },
       error: (err) => {
         console.error(err);
@@ -101,7 +97,6 @@ export class OrderDetailsComponent implements OnChanges {
     });
   }
 
-  // --- TRADUTORES PARA A INTERFACE ---
   getStatusNome(status: string): string {
     const statusMap: any = { 'RECEIVED': 'Recebido', 'CONFIRMED': 'Confirmado', 'DISPATCHED': 'Despachado', 'DELIVERED': 'Entregue', 'CANCELED': 'Cancelado' };
     return statusMap[status] || status;
@@ -117,7 +112,6 @@ export class OrderDetailsComponent implements OnChanges {
     return map[origin] || origin;
   }
 
-  // NOVO: Ícones dinâmicos de pagamento!
   getIconePagamento(origin: string): string {
     const icons: any = { 'CREDIT_CARD': '💳', 'DEBIT_CARD': '💳', 'CASH': '💵', 'PIX': '❖', 'VR': '🎟️' };
     return icons[origin] || '💲';

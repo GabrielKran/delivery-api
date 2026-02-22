@@ -24,7 +24,6 @@ export class OrderCreateComponent {
       country: 'BR', latitude: -15.7975, longitude: -47.8919, coord_id: Math.floor(Math.random() * 1000000)
     },
     items: [
-      // Aqui está a mágica: price iniciado como null para o input vir vazio!
       { name: '', price: null, quantity: 1, total_price: 0, observations: '', code: Math.floor(Math.random() * 1000), condiments: [] }
     ],
     payments: [
@@ -34,7 +33,6 @@ export class OrderCreateComponent {
 
   isSubmitting = false;
 
-  // Variáveis para o Toast Customizado
   showToast = false;
   toastMessage = '';
   toastType: 'success' | 'danger' = 'success';
@@ -56,7 +54,6 @@ export class OrderCreateComponent {
   calcularTotal() {
     let total = 0;
     this.novoPedido.items.forEach((item: any) => {
-      // Se o utilizador apagar tudo e ficar nulo, tratamos como 0 para não dar erro
       const precoAtual = item.price || 0; 
       item.total_price = precoAtual * item.quantity;
       total += item.total_price;
@@ -69,7 +66,7 @@ export class OrderCreateComponent {
     this.toastMessage = mensagem;
     this.toastType = tipo;
     this.showToast = true;
-    setTimeout(() => this.showToast = false, 3000); // Some sozinho após 3s
+    setTimeout(() => this.showToast = false, 3000);
   }
 
   salvarPedido() {
@@ -83,9 +80,8 @@ export class OrderCreateComponent {
     this.isSubmitting = true;
 
     this.orderService.create(this.novoPedido).subscribe({
-      next: () => { // Removido o "res" inútil!
+      next: () => {
         this.mostrarToast('Pedido criado com sucesso!', 'success');
-        // Atrasamos a navegação 1.5s para dar tempo de o utilizador ver a mensagem verde
         setTimeout(() => {
           this.router.navigate(['/']); 
         }, 1500);

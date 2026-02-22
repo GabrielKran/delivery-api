@@ -1,4 +1,3 @@
-// DTO levinho para a Tabela Principal
 export interface OrderSummary {
   id: string;
   total_price: number;
@@ -7,14 +6,12 @@ export interface OrderSummary {
   customer_name: string;
 }
 
-// A resposta completa que vem do findById (O Envelope)
 export interface OrderFullResponse {
   store_id: string;
   order_id: string;
   order: OrderDetails;
 }
 
-// O miolo do pedido com todos os detalhes
 export interface OrderDetails {
   total_price: number;
   last_status_name: string;
