@@ -10,7 +10,7 @@
                 [disabled]="isLoading">
                 {{ isLoading ? 'Atualizando...' : 'Atualizar Dados' }}
             </button>
-            <button class="btn btn-dark btn-sm shadow-sm filter-btn">
+            <button class="btn btn-dark btn-sm shadow-sm filter-btn" routerLink="/novo-pedido">
                 + Novo Pedido
             </button>
             <span class="badge bg-gold fs-6 shadow-sm ms-2">{{ filteredOrders.length }} Exibidos</span>
@@ -105,7 +105,7 @@
                             </td>
 
                             <td class="fw-bold">
-                                R$ {{ order.total_price.toFixed(2) }}
+                                R$ {{ (order.total_price || 0).toFixed(2) }}
                             </td>
 
                             <td class="text-center">

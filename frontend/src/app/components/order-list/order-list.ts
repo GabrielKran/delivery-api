@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { OrderService } from '../../services/order.service';
 import { OrderSummary } from '../../models/order';
 import { OrderDetailsComponent } from '../order-details/order-details';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-order-list',
   standalone: true,
-  imports: [CommonModule, OrderDetailsComponent],
+  imports: [CommonModule, OrderDetailsComponent, RouterLink],
   templateUrl: './order-list.html',
   styleUrl: './order-list.css',
 })

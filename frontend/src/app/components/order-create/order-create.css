@@ -1,0 +1,23 @@
+.fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    } 
+    
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.text-gold {
+    color: #b78b2d !important;
+}
+
+.bg-gold {
+    background-color: #b78b2d !important;
+}
