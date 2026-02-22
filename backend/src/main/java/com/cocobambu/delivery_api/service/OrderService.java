@@ -123,7 +123,6 @@ public class OrderService {
         // Atualiza o status principal
         order.setLastStatusName(novoStatus.name());
 
-        // Prevenção contra NullPointerException (boa prática)
         if (order.getStatuses() == null) {
             order.setStatuses(new java.util.ArrayList<>());
         }
@@ -134,7 +133,6 @@ public class OrderService {
         statusHistory.setCreatedAt(System.currentTimeMillis());
         statusHistory.setOrder(order);
         
-        // A LINHA CRÍTICA QUE NÃO PODE FALTAR:
         order.getStatuses().add(statusHistory);
 
         Order savedOrder = repository.save(order);

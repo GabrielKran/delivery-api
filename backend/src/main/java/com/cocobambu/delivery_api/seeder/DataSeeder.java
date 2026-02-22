@@ -103,10 +103,8 @@ public class DataSeeder implements CommandLineRunner {
                             List<com.cocobambu.delivery_api.entity.OrderItem> items = new ArrayList<>();
 
                             for (ItemDTO itemDto : details.getItems()) {
-                                // 1. PRIMEIRO criamos a entidade OrderItem
                                 com.cocobambu.delivery_api.entity.OrderItem item = new com.cocobambu.delivery_api.entity.OrderItem();
 
-                                // 2. DEPOIS passamos os dados do DTO para a Entidade (usando item.set... e não itemDto.set...)
                                 item.setCode(itemDto.getCode());
                                 if (itemDto.getDiscount() != null) {
                                     item.setDiscount(java.math.BigDecimal.valueOf(itemDto.getDiscount()));
@@ -172,7 +170,7 @@ public class DataSeeder implements CommandLineRunner {
 
         } catch (Exception e) {
             System.out.println("Falha ao ler o arquivo ou salvar no banco: " + e.getMessage());
-            e.printStackTrace(); // Vai nos ajudar a ver o erro exato se falhar novamente
+            e.printStackTrace();
         }
     }
 }

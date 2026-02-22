@@ -23,7 +23,6 @@ public class OrderController {
         return ResponseEntity.ok(service.findAll());
     }
 
-    // A MUDANÇA ESTÁ AQUI: Trocamos <Order> por <PedidoImportDTO>
     @GetMapping("/{id}")
     public ResponseEntity<PedidoImportDTO> findById(@PathVariable String id) {
         return ResponseEntity.ok(service.findById(id));
@@ -41,7 +40,6 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
-    // Atualizar o Status - A MÁQUINA DE ESTADOS (PATCH /orders/{id}/status?newStatus=CONFIRMED)
     @PatchMapping("/{id}/status")
     public ResponseEntity<PedidoImportDTO> updateStatus(@PathVariable String id, @RequestParam String newStatus) {
         PedidoImportDTO pedidoAtualizado = service.updateOrderStatus(id, newStatus);

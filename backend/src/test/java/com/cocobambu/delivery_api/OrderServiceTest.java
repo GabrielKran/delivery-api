@@ -45,11 +45,9 @@ public class OrderServiceTest {
 
     @Test
     void devePermitirTransicaoDeReceivedParaConfirmed() {
-        // Mocka a busca do banco
         when(orderRepository.findById("mock-id-123")).thenReturn(Optional.of(pedidoMock));
         
-        // MÁGICA AQUI: Diz ao Mockito para retornar o exato objeto que tentamos salvar, 
-        // com todas as modificações (incluindo o status adicionado na lista).
+        // Configura o Mockito para retornar o próprio objeto salvo
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         PedidoImportDTO atualizado = orderService.updateOrderStatus("mock-id-123", "CONFIRMED");
@@ -87,7 +85,6 @@ public class OrderServiceTest {
         assertTrue(exception.getMessage().contains("Transição de status inválida"));
     }
 
-    // --- NOVOS TESTES DE EXCLUSÃO ---
 
     @Test
     void naoDevePermitirDeletarPedidoQueNaoEstejaCancelado() {
