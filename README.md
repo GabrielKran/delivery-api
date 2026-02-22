@@ -42,14 +42,13 @@ Durante o desenvolvimento, algumas premissas arquiteturais e de negócio foram a
 
 ## 🐳 Como Executar a Solução
 
-A aplicação foi totalmente conteinerizada (Docker) para garantir a portabilidade e facilidade de teste. **Não é necessário ter o Java, Node.js ou MySQL instalados na sua máquina.** O único pré-requisito é ter o [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e em execução.
+A aplicação foi totalmente conteinerizada (Docker) para garantir a portabilidade e facilidade de teste. **Não é necessário ter o Java, Node.js ou MySQL instalados na sua máquina.** O único pré-requisito é ter o [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e em execução (garanta que não exista nenhuma programa utilizando as portas 3306 e 8080).
 
 1. Faça o clone do repositório e acesse a pasta principal do projeto:
 ```bash
 git clone https://github.com/GabrielKran/delivery-api
 
 cd delivery-api
-
 ```
 2. Suba a infraestrutura completa (Banco de Dados, Backend e Frontend) com um único comando:
 
@@ -136,3 +135,9 @@ Para o desenvolvimento desta solução, o escopo do teste técnico foi quebrado 
   * Criar `Dockerfile` multi-stage para o Spring Boot (Java 21).
   * Criar `Dockerfile` multi-stage para o Angular (Node + Nginx).
   * Criar `docker-compose.yml` conectando as duas aplicações a um container do MySQL 8.0, populando as variáveis de ambiente necessárias.
+
+### 🚀 Próximos Passos (Evoluções Futuras)
+Caso o projeto fosse continuado para novas Sprints, o backlog receberia as seguintes tarefas:
+* **Autenticação:** Implementação de Spring Security + JWT para acesso restrito.
+* **Testes no Frontend:** Criação de suíte de testes com Jest/Jasmine para os componentes Angular.
+* **Tempo Real:** Substituição do botão "Atualizar Dados" por WebSockets (ou SSE) para os pedidos atualizarem na tela automaticamente.
