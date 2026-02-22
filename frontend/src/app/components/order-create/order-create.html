@@ -15,7 +15,7 @@
             <h5 class="fw-bold mb-3">Dados do Cliente</h5>
             <div class="row g-3">
               <div class="col-md-7">
-                <label class="form-label small text-muted">Nome Completo</label>
+                <label class="form-label small text-muted">Nome Completo <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" [(ngModel)]="novoPedido.customer.name" name="cName" required placeholder="Ex: João da Silva">
               </div>
               <div class="col-md-5">
@@ -31,7 +31,7 @@
             <h5 class="fw-bold mb-3">Endereço de Entrega e GPS</h5>
             <div class="row g-3">
               <div class="col-md-9">
-                <label class="form-label small text-muted">Rua / Avenida</label>
+                <label class="form-label small text-muted">Rua / Avenida <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" [(ngModel)]="novoPedido.delivery_address.street_name" name="street" required>
               </div>
               <div class="col-md-3">
@@ -55,7 +55,6 @@
                 <label class="form-label small text-muted">Longitude (GPS)</label>
                 <input type="number" class="form-control" [(ngModel)]="novoPedido.delivery_address.longitude" name="lng" step="any">
               </div>
-
             </div>
           </div>
         </div>
@@ -85,11 +84,11 @@
                 <div class="row g-2 mb-2">
                   <div class="col-6">
                     <label class="form-label small text-muted mb-0">Preço (R$)</label>
-                    <input type="number" class="form-control form-control-sm" [(ngModel)]="item.price" name="itemPrice_{{$index}}" (change)="calcularTotal()" min="0">
+                    <input type="number" class="form-control form-control-sm" [(ngModel)]="item.price" name="itemPrice_{{$index}}" (change)="calcularTotal()" (keyup)="calcularTotal()" min="0">
                   </div>
                   <div class="col-6">
                     <label class="form-label small text-muted mb-0">Quantidade</label>
-                    <input type="number" class="form-control form-control-sm" [(ngModel)]="item.quantity" name="itemQty_{{$index}}" (change)="calcularTotal()" min="1">
+                    <input type="number" class="form-control form-control-sm" [(ngModel)]="item.quantity" name="itemQty_{{$index}}" (change)="calcularTotal()" (keyup)="calcularTotal()" min="1">
                   </div>
                 </div>
 
@@ -131,3 +130,11 @@
     </div>
   </form>
 </div>
+
+@if (showToast) {
+  <div class="custom-toast shadow-lg rounded-3 d-flex align-items-center px-4 py-3 text-white" 
+       [ngClass]="toastType === 'success' ? 'bg-success' : 'bg-danger'">
+    <i class="bi me-2 fs-5" [ngClass]="toastType === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
+    <span class="fw-medium">{{ toastMessage }}</span>
+  </div>
+}

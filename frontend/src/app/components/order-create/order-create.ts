@@ -13,30 +13,19 @@ import { OrderService } from '../../services/order.service';
 })
 export class OrderCreateComponent {
   
-  // Objeto padronizado em SNAKE_CASE para bater 100% com o Backend
   novoPedido: any = {
     store_id: 'f052054c-e0a0-4768-ab55-7cb7ead57371',
     store_name: 'Coco Bambu Loja Teste',
     total_price: 0,
-    customer: {
-      name: '',
-      temporary_phone: ''
-    },
+    customer: { name: '', temporary_phone: '' },
     delivery_address: {
-      street_name: '',
-      street_number: '',
-      neighborhood: '',
-      city: 'Brasília',
-      state: 'Distrito Federal',
-      postal_code: '70000-000',
-      reference: '',
-      country: 'BR',
-      latitude: -15.7975,
-      longitude: -47.8919,
-      coord_id: Math.floor(Math.random() * 1000000)
+      street_name: '', street_number: '', neighborhood: '', city: 'Brasília',
+      state: 'Distrito Federal', postal_code: '70000-000', reference: '',
+      country: 'BR', latitude: -15.7975, longitude: -47.8919, coord_id: Math.floor(Math.random() * 1000000)
     },
     items: [
-      { name: '', price: 0, quantity: 1, total_price: 0, observations: '', code: Math.floor(Math.random() * 1000), condiments: [] }
+      // Aqui está a mágica: price iniciado como null para o input vir vazio!
+      { name: '', price: null, quantity: 1, total_price: 0, observations: '', code: Math.floor(Math.random() * 1000), condiments: [] }
     ],
     payments: [
       { origin: 'CREDIT_CARD', value: 0, prepaid: true }
@@ -45,11 +34,16 @@ export class OrderCreateComponent {
 
   isSubmitting = false;
 
+  // Variáveis para o Toast Customizado
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'danger' = 'success';
+
   constructor(private orderService: OrderService, private router: Router) {}
 
   adicionarItem() {
     this.novoPedido.items.push({ 
-      name: '', price: 0, quantity: 1, total_price: 0, observations: '', code: Math.floor(Math.random() * 1000), condiments: [] 
+      name: '', price: null, quantity: 1, total_price: 0, observations: '', code: Math.floor(Math.random() * 1000), condiments: [] 
     });
     this.calcularTotal();
   }
@@ -62,31 +56,43 @@ export class OrderCreateComponent {
   calcularTotal() {
     let total = 0;
     this.novoPedido.items.forEach((item: any) => {
-      item.total_price = item.price * item.quantity;
+      // Se o utilizador apagar tudo e ficar nulo, tratamos como 0 para não dar erro
+      const precoAtual = item.price || 0; 
+      item.total_price = precoAtual * item.quantity;
       total += item.total_price;
     });
     this.novoPedido.total_price = total;
     this.novoPedido.payments[0].value = total;
   }
 
+  mostrarToast(mensagem: string, tipo: 'success' | 'danger') {
+    this.toastMessage = mensagem;
+    this.toastType = tipo;
+    this.showToast = true;
+    setTimeout(() => this.showToast = false, 3000); // Some sozinho após 3s
+  }
+
   salvarPedido() {
     this.calcularTotal(); 
     
     if (this.novoPedido.total_price <= 0 || !this.novoPedido.customer.name || !this.novoPedido.delivery_address.street_name) {
-      alert('Preencha o nome do cliente, a rua e certifique-se de que o total é maior que zero!');
+      this.mostrarToast('Preencha os campos obrigatórios e adicione um preço!', 'danger');
       return;
     }
 
     this.isSubmitting = true;
 
     this.orderService.create(this.novoPedido).subscribe({
-      next: (res) => {
-        // Redireciona de volta para a lista após criar com sucesso
-        this.router.navigate(['/']); 
+      next: () => { // Removido o "res" inútil!
+        this.mostrarToast('Pedido criado com sucesso!', 'success');
+        // Atrasamos a navegação 1.5s para dar tempo de o utilizador ver a mensagem verde
+        setTimeout(() => {
+          this.router.navigate(['/']); 
+        }, 1500);
       },
       error: (err) => {
         console.error('Erro detalhado:', err);
-        alert('Erro ao criar pedido. Verifique o console do navegador e do Spring Boot.');
+        this.mostrarToast('Erro ao criar pedido. Verifique a ligação.', 'danger');
         this.isSubmitting = false;
       }
     });
